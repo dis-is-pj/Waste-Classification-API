@@ -7,6 +7,7 @@ import numpy as np
 
 import requests as req
 from io import BytesIO
+import gc
 
 
 # Load the model
@@ -45,6 +46,8 @@ class GetPrediction(Resource):
         image = (image.astype(np.float32) / 127.0) - 1
         image = np.array([image])
         label = np.argmax(model.predict(image))
+        del image
+        gc.collect()
         return int(label)
     
 api.add_resource(GetPrediction, '/<string:filename>')
