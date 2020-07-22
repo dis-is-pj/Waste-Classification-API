@@ -1,57 +1,33 @@
-from flask import Flask, request
+
+from flask import Flask
+import requests
+import os
+#from flask_ngrok import run_with_ngrok
+from fastai.vision import load_learner, open_image
 from flask_restful import Resource, Api
 
-from tensorflow.keras.models import load_model
-from PIL import Image, ImageOps
-import numpy as np
+learn = load_learner('')
 
-import requests as req
-from io import BytesIO
-import gc
+def pred(filename):
+    url = 'https://binary-cdk.herokuapp.com/static/uploads/' + filename
+    try:
+        r = requests.get(url, allow_redirects=True)
+        open('/tmp/image.jpg','wb').write(r.content)
+        img = open_image('/tmp/image.jpg')
+        s = str(learn.predict(img)[0])
+        return(s)
+    except:
+        return('Nahi ho Paya')
 
-
-# Load the model
-model = load_model('keras_model.h5')
-'''
-def get_img(url):
-    response = req.get(url)
-    img = Image.open(BytesIO(response.content))
-    return img
-
-
-def img_preprocessing(url):
-    image = get_img(url)
-    image = ImageOps.fit(image, (224,224), Image.ANTIALIAS)
-    image = np.asarray(image)
-    image = (image.astype(np.float32) / 127.0) - 1
-    image = np.array([image])
-    return(image)
-
-
-def predict(url):
-    img = img_preprocessing(url)
-    return(np.argmax(model.predict(img)))
-'''
 app = Flask(__name__)
 api = Api(app)
-
+#run_with_ngrok(app)
 
 class GetPrediction(Resource):
-    def get(self, filename):
-        url = 'https://binary-cdk.herokuapp.com/static/uploads/' + filename
-        response = req.get(url)
-        image = Image.open(BytesIO(response.content))
-        image = ImageOps.fit(image, (224,224), Image.ANTIALIAS)
-        image = np.asarray(image)
-        image = (image.astype(np.float32) / 127.0) - 1
-        image = np.array([image])
-        label = np.argmax(model.predict(image))
-        del image
-        gc.collect()
-        return int(label)
-    
-api.add_resource(GetPrediction, '/<string:filename>')
+    def get(self,filename):
+        return(pred(filename))
 
+api.add_resource(GetPrediction, '/<string:filename>')
 
 if __name__ == '__main__':
     app.run()
