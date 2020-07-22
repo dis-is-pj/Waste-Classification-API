@@ -1,11 +1,11 @@
 
 from flask import Flask
-import requests
-import os
-#from flask_ngrok import run_with_ngrok
+# from flask_ngrok import run_with_ngrok
 from fastai.vision import load_learner, open_image
 from flask_restful import Resource, Api
 import pyrebase
+
+
 config={
     "apiKey": "AIzaSyBumH3t0dgqUQfNRx0lhZdrp4UcA0s6r7o",
     "authDomain": "sih-db-3b091.firebaseapp.com",
@@ -21,19 +21,17 @@ config={
 learn = load_learner('')
 
 def pred(filename):
-    url = 'https://binary-cdk.herokuapp.com/static/uploads/' + filename
     try:
         firebase=pyrebase.initialize_app(config)
         storage= firebase.storage()
         pathoncloud='images/'+filename
-        pathlocal='/tmp/'+filename
+        pathlocal = '/tmp/image.jpg'
         storage.child(pathoncloud).download(pathlocal)
-
         img = open_image('/tmp/image.jpg')
         s = str(learn.predict(img)[0])
         return(s)
     except:
-        return('Nahi ho Paya')
+        return("error")
 
 app = Flask(__name__)
 api = Api(app)

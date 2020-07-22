@@ -1,6 +1,7 @@
 Flask==1.1.2
 flask_restful==0.3.8
 fastai>=1.0
+pyrebase==3.0.27
 
 # PyTorch 1.1.0
 https://download.pytorch.org/whl/cpu/torch-1.1.0-cp37-cp37m-linux_x86_64.whl
